@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
         ), // Navigate to your dashboard screen
       );
     } else {
-      Navigator.of(context).push(
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => const OnboardingScreen(),
         ), // Navigate to your login screen
