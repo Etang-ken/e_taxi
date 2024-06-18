@@ -1,3 +1,5 @@
+import 'package:e_taxi/helper/helper/location_service.dart';
+import 'package:e_taxi/helper/widgets.dart';
 import 'package:e_taxi/screens/dashboard/transport/select_transport.dart';
 import 'package:e_taxi/theme/app_colors.dart';
 import 'package:e_taxi/theme/app_styles.dart';
@@ -11,6 +13,45 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool isLoading = false;
+  final TextEditingController _pickupController = TextEditingController();
+  String? _locationMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _getLocation();
+  }
+
+  void _getLocation() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      var position = await LocationService().getCurrentLocation();
+      var address = await LocationService().getAddressFromCoordinates(position);
+      setState(() {
+        // _locationMessage =
+        _pickupController.text = address;
+      });
+    } catch (e) {
+      setState(() {
+        _locationMessage = "Failed to get location: ${e.toString()}";
+      });
+      _pickupController.text = "";
+      showAppSnackBar(
+          context: context,
+          message:
+              "Error getting location, please make sure your device's location is on.",
+          type: SnackBarType.failure);
+      print(_locationMessage);
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -30,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: Column(
             children: [
-
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.4,
               ),
@@ -74,6 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     Expanded(
                       child: TextFormField(
+                        controller: _pickupController,
                         decoration: InputDecoration(
                           fillColor: Colors.transparent,
                           focusedBorder: InputBorder.none,
@@ -138,10 +179,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => SelectTransportScreen()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SelectTransportScreen()));
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 18),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 8, horizontal: 18),
                       decoration: BoxDecoration(
                         color: AppColors.primaryColor,
                         borderRadius: BorderRadius.circular(30),
